@@ -1,0 +1,16 @@
+{
+    "sonarlint.rules": {
+        "php:S100": {
+            "level": "off"
+        },
+        "php:S1172": {
+            "level": "off"
+        },
+        "php:S1488": {
+            "level": "off"
+        },
+        "php:S121": {
+            "level": "off"
+        }
+    }
+}
