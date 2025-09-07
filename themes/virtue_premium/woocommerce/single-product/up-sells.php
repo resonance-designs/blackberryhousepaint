@@ -2,115 +2,70 @@
 /**
  * Single Product Up-Sells
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     3.0.0
+ * This template can be overridden by copying it to yourtheme/woocommerce/single-product/up-sells.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see         https://woocommerce.com/document/template-structure/
+ * @package     WooCommerce\Templates
+ * @version     9.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
-global $product, $woocommerce, $woocommerce_loop, $virtue_premium;
-if(!empty($virtue_premium['related_item_column'])) {
-	$product_related_column = $virtue_premium['related_item_column'];
-} else {
-	$product_related_column = '4';
-}
-$woocommerce_loop['columns'] = $product_related_column;
-
-    $rpc = array();
-	if ($product_related_column == '2') {
-		$rpc['xxl'] = 2; 
-		$rpc['xl'] = 2; 
-		$rpc['md'] = 2; 
-		$rpc['sm'] = 2; 
-		$rpc['xs'] = 1;
-		$rpc['ss'] = 1; 
-	} else if ($product_related_column == '3'){
-		$rpc['xxl'] = 3; 
-		$rpc['xl'] = 3; 
-		$rpc['md'] = 3; 
-		$rpc['sm'] = 3; 
-		$rpc['xs'] = 2;
-		$rpc['ss'] = 1; 
-	} else if ($product_related_column == '6'){
-		$rpc['xxl'] = 6; 
-		$rpc['xl'] = 6; 
-		$rpc['md'] = 6; 
-		$rpc['sm'] = 4; 
-		$rpc['xs'] = 3;
-		$rpc['ss'] = 2; 
-	} else if ($product_related_column == '5'){
-		$rpc['xxl'] = 5; 
-		$rpc['xl'] = 5; 
-		$rpc['md'] = 5; 
-		$rpc['sm'] = 4; 
-		$rpc['xs'] = 3;
-		$rpc['ss'] = 2; 
-	} else {
-		$rpc['xxl'] = 4; 
-		$rpc['xl'] = 4; 
-		$rpc['md'] = 4; 
-		$rpc['sm'] = 3; 
-		$rpc['xs'] = 2;
-		$rpc['ss'] = 1; 
-	} 
-
-	$rpc = apply_filters('kt_upsell_products_columns', $rpc);
-
-if ( version_compare( WC_VERSION, '3.0', '>' ) ) {
-	$upsells = $product->get_upsell_ids();
-} else {
-	$upsells = $product->get_upsells();
-}
-
-
-if ( sizeof( $upsells ) === 0 ) {
-	return;
-}
-
-$meta_query = WC()->query->get_meta_query();
-
-$args = array(
-	'post_type'           => 'product',
-	'ignore_sticky_posts' => 1,
-	'no_found_rows'       => 1,
-	'posts_per_page'      => 8,
-	'orderby'             => $orderby,
-	'post__in'            => $upsells,
-	'post__not_in'        => array( $product->get_id() ),
-	'meta_query'          => $meta_query
-);
-if ( ! empty($virtue_premium['wc_upsell_products_text'] ) ) {
-	$upsell_text = $virtue_premium['wc_upsell_products_text'];
-} else {
-	$upsell_text = __( 'You may also like&hellip;', 'virtue');
-}
-
-$products = new WP_Query( $args );
-
-if ( $products->have_posts() ) : 
+if ( $upsells ) :
+	// Enqueue theme's Slick carousel initializer.
 	wp_enqueue_script( 'virtue-slick-init' );
+
+	// Columns/responsive config preserved from theme, with filter.
+	$product_related_column = function_exists( 'virtue_premium_get_option' ) ? virtue_premium_get_option( 'related_item_column', '4' ) : '4';
+
+	$rpc = array();
+	if ( '2' === (string) $product_related_column ) {
+		$rpc = array( 'xxl' => 2, 'xl' => 2, 'md' => 2, 'sm' => 2, 'xs' => 1, 'ss' => 1 );
+	} elseif ( '3' === (string) $product_related_column ) {
+		$rpc = array( 'xxl' => 3, 'xl' => 3, 'md' => 3, 'sm' => 3, 'xs' => 2, 'ss' => 1 );
+	} elseif ( '6' === (string) $product_related_column ) {
+		$rpc = array( 'xxl' => 6, 'xl' => 6, 'md' => 6, 'sm' => 4, 'xs' => 3, 'ss' => 2 );
+	} elseif ( '5' === (string) $product_related_column ) {
+		$rpc = array( 'xxl' => 5, 'xl' => 5, 'md' => 5, 'sm' => 4, 'xs' => 3, 'ss' => 2 );
+	} else {
+		$rpc = array( 'xxl' => 4, 'xl' => 4, 'md' => 4, 'sm' => 3, 'xs' => 2, 'ss' => 1 );
+	}
+	$rpc = apply_filters( 'kt_upsell_products_columns', $rpc );
+
+	$heading = apply_filters( 'woocommerce_product_upsells_products_heading', __( 'You may also like&hellip;', 'woocommerce' ) );
 	?>
 
-	<div class="upsells products carousel_outerrim">
-		<h3><?php echo $upsell_text; ?></h3>
-	<div class="fredcarousel">
-		<div id="carouselcontainer-upsell" class="rowtight">
-			<div id="upsale-product-carousel" class="products slick-slider product_upsell_carousel kt-slickslider kt-content-carousel loading clearfix" data-slider-fade="false" data-slider-type="content-carousel" data-slider-anim-speed="400" data-slider-scroll="1" data-slider-auto="true" data-slider-speed="9000" data-slider-xxl="<?php echo esc_attr($rpc['xxl']);?>" data-slider-xl="<?php echo esc_attr($rpc['xl']);?>" data-slider-md="<?php echo esc_attr($rpc['md']);?>" data-slider-sm="<?php echo esc_attr($rpc['sm']);?>" data-slider-xs="<?php echo esc_attr($rpc['xs']);?>" data-slider-ss="<?php echo esc_attr($rpc['ss']);?>">
+	<section class="up-sells upsells products carousel_outerrim">
+		<?php if ( $heading ) : ?>
+			<h2><?php echo esc_html( $heading ); ?></h2>
+		<?php endif; ?>
 
-					<?php while ( $products->have_posts() ) : $products->the_post(); 
+		<div class="fredcarousel">
+			<div id="carouselcontainer-upsell" class="rowtight">
+				<div id="upsale-product-carousel" class="products slick-slider product_upsell_carousel kt-slickslider kt-content-carousel loading clearfix" data-slider-fade="false" data-slider-type="content-carousel" data-slider-anim-speed="400" data-slider-scroll="1" data-slider-auto="true" data-slider-speed="9000" data-slider-xxl="<?php echo esc_attr( $rpc['xxl'] ); ?>" data-slider-xl="<?php echo esc_attr( $rpc['xl'] ); ?>" data-slider-md="<?php echo esc_attr( $rpc['md'] ); ?>" data-slider-sm="<?php echo esc_attr( $rpc['sm'] ); ?>" data-slider-xs="<?php echo esc_attr( $rpc['xs'] ); ?>" data-slider-ss="<?php echo esc_attr( $rpc['ss'] ); ?>">
 
-						wc_get_template_part( 'content', 'product' ); 
-
-					endwhile;?>
+					<?php foreach ( $upsells as $upsell ) : ?>
+						<?php
+						$post_object = get_post( $upsell->get_id() );
+						setup_postdata( $GLOBALS['post'] = $post_object ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.PHP.DisallowMultipleAssignments.Found
+						wc_get_template_part( 'content', 'product' );
+						?>
+					<?php endforeach; ?>
 
 				</div>
 			</div>
 		</div>
-	</div>
+	</section>
 
-<?php endif;
+	<?php
+endif;
 
 wp_reset_postdata();

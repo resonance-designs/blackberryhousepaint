@@ -2,9 +2,17 @@
 /**
  * Related Products
  *
- * @author      WooThemes
- * @package     WooCommerce/Templates
- * @version     3.9.0
+ * This template can be overridden by copying it to yourtheme/woocommerce/single-product/related.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see         https://woocommerce.com/document/template-structure/
+ * @package     WooCommerce\Templates
+ * @version     9.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,73 +20,46 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( $related_products ) :
+	// Enqueue theme's Slick carousel initializer.
+	wp_enqueue_script( 'virtue-slick-init' );
 
-	$product_related_column = virtue_premium_get_option( 'related_item_column', '4' );
+	// Columns/responsive config preserved from theme, with filter.
+	$product_related_column = function_exists( 'virtue_premium_get_option' ) ? virtue_premium_get_option( 'related_item_column', '4' ) : '4';
 
 	$rpc = array();
-	if ( '2' == $product_related_column ) {
-		$rpc['xxl'] = 2;
-		$rpc['xl']  = 2;
-		$rpc['md']  = 2;
-		$rpc['sm']  = 2;
-		$rpc['xs']  = 1;
-		$rpc['ss']  = 1;
-	} elseif ( '3' == $product_related_column ) {
-		$rpc['xxl'] = 3;
-		$rpc['xl']  = 3;
-		$rpc['md']  = 3;
-		$rpc['sm']  = 3;
-		$rpc['xs']  = 2;
-		$rpc['ss']  = 1;
-	} elseif ( '6' == $product_related_column ) {
-		$rpc['xxl'] = 6;
-		$rpc['xl']  = 6;
-		$rpc['md']  = 6;
-		$rpc['sm']  = 4;
-		$rpc['xs']  = 3;
-		$rpc['ss']  = 2;
-	} elseif ( '5' == $product_related_column ) {
-		$rpc['xxl'] = 5;
-		$rpc['xl']  = 5;
-		$rpc['md']  = 5;
-		$rpc['sm']  = 4;
-		$rpc['xs']  = 3;
-		$rpc['ss']  = 2;
+	if ( '2' === (string) $product_related_column ) {
+		$rpc = array( 'xxl' => 2, 'xl' => 2, 'md' => 2, 'sm' => 2, 'xs' => 1, 'ss' => 1 );
+	} elseif ( '3' === (string) $product_related_column ) {
+		$rpc = array( 'xxl' => 3, 'xl' => 3, 'md' => 3, 'sm' => 3, 'xs' => 2, 'ss' => 1 );
+	} elseif ( '6' === (string) $product_related_column ) {
+		$rpc = array( 'xxl' => 6, 'xl' => 6, 'md' => 6, 'sm' => 4, 'xs' => 3, 'ss' => 2 );
+	} elseif ( '5' === (string) $product_related_column ) {
+		$rpc = array( 'xxl' => 5, 'xl' => 5, 'md' => 5, 'sm' => 4, 'xs' => 3, 'ss' => 2 );
 	} else {
-		$rpc['xxl'] = 4;
-		$rpc['xl']  = 4;
-		$rpc['md']  = 4;
-		$rpc['sm']  = 3;
-		$rpc['xs']  = 2;
-		$rpc['ss']  = 1;
+		$rpc = array( 'xxl' => 4, 'xl' => 4, 'md' => 4, 'sm' => 3, 'xs' => 2, 'ss' => 1 );
 	}
 	$rpc = apply_filters( 'kt_related_products_columns', $rpc );
 
-	wp_enqueue_script( 'virtue-slick-init' );
-
-	$heading = apply_filters( 'woocommerce_product_related_products_heading', virtue_premium_get_option( 'related_products_text', __( 'Related Products', 'virtue' ) ) );
+	$heading = apply_filters( 'woocommerce_product_related_products_heading', __( 'Related products', 'woocommerce' ) );
 	?>
 
 	<section class="related products carousel_outerrim">
-		<?php
-		if ( $heading ) :
-			?>
-			<h3><?php echo esc_html( $heading ); ?></h3>
+		<?php if ( $heading ) : ?>
+			<h2><?php echo esc_html( $heading ); ?></h2>
 		<?php endif; ?>
+
 		<div class="fredcarousel">
 			<div id="carouselcontainer" class="rowtight">
 				<div id="related-product-carousel" class="products slick-slider product_related_carousel kt-slickslider kt-content-carousel loading clearfix" data-slider-fade="false" data-slider-type="content-carousel" data-slider-anim-speed="400" data-slider-scroll="1" data-slider-auto="true" data-slider-speed="9000" data-slider-xxl="<?php echo esc_attr( $rpc['xxl'] ); ?>" data-slider-xl="<?php echo esc_attr( $rpc['xl'] ); ?>" data-slider-md="<?php echo esc_attr( $rpc['md'] ); ?>" data-slider-sm="<?php echo esc_attr( $rpc['sm'] ); ?>" data-slider-xs="<?php echo esc_attr( $rpc['xs'] ); ?>" data-slider-ss="<?php echo esc_attr( $rpc['ss'] ); ?>">
-					<?php foreach ( $related_products as $related_product ) : ?>
 
+					<?php foreach ( $related_products as $related_product ) : ?>
 						<?php
 						$post_object = get_post( $related_product->get_id() );
-
-						setup_postdata( $GLOBALS['post'] =& $post_object ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.PHP.DisallowMultipleAssignments.Found
-
+						setup_postdata( $GLOBALS['post'] = $post_object ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.PHP.DisallowMultipleAssignments.Found
 						wc_get_template_part( 'content', 'product' );
 						?>
-
 					<?php endforeach; ?>
+
 				</div>
 			</div>
 		</div>
